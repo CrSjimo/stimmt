@@ -14,12 +14,19 @@
 #include <QTime>
 #include <QVBoxLayout>
 #include <QtSvg/QSvgRenderer>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QGroupBox>
+#include <QRadioButton>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QMessageBox>
 
 #include "Global/Console.h"
 #include "Global/GlobalObject.h"
 
 namespace stimmt {
-    JavaScriptOutputWidget::JavaScriptOutputWidget(QWidget * parent) : QWidget(parent) {
+    JavaScriptOutputWidget::JavaScriptOutputWidget(QWidget * parent) : QWidget(parent), m_textEdit(new QTextBrowser) {
         auto mainLayout = new QVBoxLayout;
         setLayout(mainLayout);
         mainLayout->setSpacing(0);
@@ -30,33 +37,31 @@ namespace stimmt {
         auto fileMenu = menuBar->addMenu(tr("&File"));
 
         auto exportAction = fileMenu->addAction(tr("E&xport"));
-        connect(exportAction, &QAction::triggered, this, [=]() {
-            auto initialFileName =
-                "javascript-output-" + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss") + ".log";
-            auto filePath = QFileDialog::getSaveFileName(this, {}, initialFileName,
-                                                         QString("%1 (*.txt *.log)").arg(tr("Text files")));
-            if (filePath.isEmpty())
-                return;
-            QFile f(filePath);
-            f.open(QIODevice::WriteOnly);
-            f.write(m_cachedMessages.toUtf8());
-        });
+        connect(exportAction, &QAction::triggered, this, &JavaScriptOutputWidget::exportCachedMessages);
 
         auto editMenu = menuBar->addMenu(tr("&Edit"));
 
         auto copyAction = editMenu->addAction(tr("&Copy"));
         copyAction->setShortcut(QKeySequence::Copy);
+        copyAction->setEnabled(false);
+        connect(m_textEdit, &QTextEdit::copyAvailable, copyAction, &QAction::setEnabled);
+        connect(copyAction, &QAction::triggered, m_textEdit, &QTextEdit::copy);
 
         editMenu->addSeparator();
 
         auto findAction = editMenu->addAction(tr("&Find"));
         findAction->setShortcut(QKeySequence::Find);
+        connect(findAction, &QAction::triggered, this, &JavaScriptOutputWidget::openFindDialog);
 
-        auto findNextAction = editMenu->addAction(tr("Find &Next"));
-        findNextAction->setShortcut(QKeySequence::FindNext);
+        m_findNextAction = editMenu->addAction(tr("Find &Next"));
+        m_findNextAction->setShortcut(QKeySequence::FindNext);
+        m_findNextAction->setEnabled(false);
+        connect(m_findNextAction, &QAction::triggered, this, [=] { findNext(false); });
 
-        auto findPreviousAction = editMenu->addAction(tr("Find &Previous"));
-        findPreviousAction->setShortcut(QKeySequence::FindPrevious);
+        m_findPreviousAction = editMenu->addAction(tr("Find &Previous"));
+        m_findPreviousAction->setShortcut(QKeySequence::FindPrevious);
+        m_findPreviousAction->setEnabled(false);
+        connect(m_findPreviousAction, &QAction::triggered, this, [=] { findNext(true); });
 
         editMenu->addSeparator();
 
@@ -132,7 +137,6 @@ namespace stimmt {
 
         mainLayout->addWidget(menuBar);
 
-        m_textEdit = new QTextBrowser;
         m_textEdit->setOpenLinks(false);
         QFont font("Monospace", 10);
         font.setStyleHint(QFont::TypeWriter);
@@ -170,7 +174,7 @@ namespace stimmt {
             {0xff, 0xec, 0x99},
             {0xff, 0xc9, 0xc9}
         }[level];
-        QString levelImage = QStringList{{}, ":/icons/info.svg", {}, ":/icons/warning.svg", ":/icons/error.svg"}[level];
+        QString levelImage = QStringList{{}, ":/stimmt/icons/info.svg", {}, ":/stimmt/icons/warning.svg", ":/stimmt/icons/error.svg"}[level];
         QTextCursor cur(m_textEdit->document());
         cur.movePosition(QTextCursor::End);
         cur.movePosition(QTextCursor::PreviousBlock);
@@ -266,5 +270,110 @@ namespace stimmt {
             m_levelFlags |= (1 << flag);
         else
             m_levelFlags &= ~(1 << flag);
+    }
+
+    void JavaScriptOutputWidget::exportCachedMessages() {
+        auto initialFileName =
+                "javascript-output-" + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss") + ".log";
+        auto filePath = QFileDialog::getSaveFileName(this, {}, initialFileName,
+                                                     QString("%1 (*.txt *.log)").arg(tr("Text files")));
+        if (filePath.isEmpty())
+            return;
+        QFile f(filePath);
+        f.open(QIODevice::WriteOnly);
+        f.write(m_cachedMessages.toUtf8());
+    }
+
+    void JavaScriptOutputWidget::openFindDialog() {
+        QDialog dlg(this);
+        dlg.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+        auto dlgLayout = new QHBoxLayout;
+        auto findSectionLayout = new QVBoxLayout;
+        auto findEditLayout = new QFormLayout;
+        auto findEdit = new QLineEdit;
+        findEditLayout->addRow(tr("&Find"), findEdit);
+        auto optionsDirectionLayout = new QHBoxLayout;
+        auto optionsGroupBox = new QGroupBox(tr("Options"));
+        auto optionsLayout = new QVBoxLayout;
+        auto matchCaseCheckBox = new QCheckBox(tr("Match &Case"));
+        auto regExCheckBox = new QCheckBox(tr("&Regular Expression"));
+        auto matchWholeWordsCheckBox = new QCheckBox(tr("Match &Whole Words"));
+        optionsLayout->addWidget(matchCaseCheckBox);
+        optionsLayout->addWidget(regExCheckBox);
+        optionsLayout->addWidget(matchWholeWordsCheckBox);
+        optionsGroupBox->setLayout(optionsLayout);
+        auto directionGroupBox = new QGroupBox(tr("Direction"));
+        auto directionLayout = new QVBoxLayout;
+        auto upRadio = new QRadioButton(tr("&Up"));
+        auto downRadio = new QRadioButton(tr("&Down"));
+        directionLayout->addWidget(upRadio);
+        directionLayout->addWidget(downRadio);
+        directionGroupBox->setLayout(directionLayout);
+        optionsDirectionLayout->addWidget(optionsGroupBox);
+        optionsDirectionLayout->addWidget(directionGroupBox);
+        findSectionLayout->addLayout(findEditLayout);
+        findSectionLayout->addLayout(optionsDirectionLayout, 1);
+        auto buttonLayout = new QVBoxLayout;
+        auto findButton = new QPushButton(tr("Find"));
+        auto cancelButton = new QPushButton(tr("Cancel"));
+        buttonLayout->addWidget(findButton);
+        buttonLayout->addWidget(cancelButton);
+        buttonLayout->addStretch();
+        dlgLayout->addLayout(findSectionLayout);
+        dlgLayout->addLayout(buttonLayout);
+        dlg.setLayout(dlgLayout);
+
+        connect(findEdit, &QLineEdit::textChanged, findButton, [=] { findButton->setDisabled(findEdit->text().isEmpty()); });
+        findButton->setDefault(true);
+        connect(findButton, &QPushButton::clicked, &dlg, [=, &dlg] {
+            m_findNextAction->setEnabled(true);
+            m_findPreviousAction->setEnabled(true);
+            m_findContext.text = findEdit->text();
+            m_findContext.matchCase = matchCaseCheckBox->isChecked();
+            m_findContext.isRegEx = regExCheckBox->isChecked();
+            m_findContext.matchWholeWords = matchWholeWordsCheckBox->isChecked();
+            if (upRadio->isChecked()) {
+                if (findNext(true))
+                    dlg.accept();
+            } else {
+                if (findNext(false))
+                    dlg.accept();
+            }
+        });
+        connect(cancelButton, &QPushButton::clicked, &dlg, &QDialog::reject);
+        if (!m_findContext.text.isEmpty()) {
+            findEdit->setText(m_findContext.text);
+            matchCaseCheckBox->setChecked(m_findContext.matchCase);
+            regExCheckBox->setChecked(m_findContext.isRegEx);
+            matchWholeWordsCheckBox->setChecked(m_findContext.matchWholeWords);
+        }
+        downRadio->setChecked(true);
+        dlg.exec();
+
+    }
+
+    bool JavaScriptOutputWidget::findNext(bool backward) {
+        QTextDocument::FindFlags flags;
+        if (m_findContext.matchCase)
+            flags |= QTextDocument::FindCaseSensitively;
+        if (m_findContext.matchWholeWords)
+            flags |= QTextDocument::FindWholeWords;
+        if (backward)
+            flags |= QTextDocument::FindBackward;
+        bool ret;
+        for (int i = 0; i < 2; i++) {
+            if (m_findContext.isRegEx)
+                ret = m_textEdit->find(QRegExp(m_findContext.text), flags);
+            else
+                ret = m_textEdit->find(m_findContext.text, flags);
+            if (ret)
+                break;
+            else if (i == 0)
+                m_textEdit->moveCursor(backward ? QTextCursor::End : QTextCursor::Start);
+        }
+        if (!ret) {
+            QMessageBox::warning(this, {}, tr(R"(Cannot find "%1".)").arg(m_findContext.text));
+        }
+        return ret;
     }
 }

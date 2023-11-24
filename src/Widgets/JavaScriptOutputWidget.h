@@ -26,6 +26,19 @@ namespace stimmt {
         bool m_showFileTrace = true;
         bool m_showTime = false;
         QString m_cachedMessages;
+
+        void exportCachedMessages();
+
+        struct {
+            QString text;
+            bool matchCase;
+            bool isRegEx;
+            bool matchWholeWords;
+        } m_findContext;
+        QAction *m_findNextAction;
+        QAction *m_findPreviousAction;
+        void openFindDialog();
+        bool findNext(bool backward);
     };
 }
 
