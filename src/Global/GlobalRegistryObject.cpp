@@ -29,7 +29,7 @@ namespace stimmt {
     }
 
     void GlobalRegistryObject::registerBuiltInScripts() {
-        m_builtInScriptHelper = jsGlobal->load(":/scripts/builtInScriptHelper.js");
+        m_builtInScriptHelper = jsGlobal->load(":/stimmt/scripts/builtInScriptHelper.js");
         for (const auto &[impl, manifest, isVisibleToUser]: m_internalScriptImplementations) {
             registerScriptImplementation(impl, manifest, isVisibleToUser);
         }

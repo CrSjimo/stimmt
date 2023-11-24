@@ -1,9 +1,6 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/stimmt/">
         <file>scripts/builtInScriptHelper.js</file>
-        <file>scripts/test.js</file>
-    </qresource>
-    <qresource prefix="/">
         <file>icons/info.svg</file>
         <file>icons/warning.svg</file>
         <file>icons/error.svg</file>

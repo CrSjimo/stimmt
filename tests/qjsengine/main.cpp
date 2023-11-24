@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     win->setCentralWidget(mainWidget);
     win->show();
     GlobalObject global;
-    auto ret = global.load(":/scripts/test.js");
+    auto ret = global.load(":/test.js");
     if (ret.isError())
         qDebug() << ret.toString();
     qDebug() << global.registry()->scripts();
