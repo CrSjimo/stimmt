@@ -59,7 +59,7 @@ set(STIMMT_TRANSLATIONS zh_CN zh_TW ja_JP)
 # ----------------------------------
 # Main Project
 # ----------------------------------
-find_package(qtmediate-cmake-modules REQUIRED)
+find_package(qmsetup REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(share)

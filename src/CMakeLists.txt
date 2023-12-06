@@ -1,3 +1,5 @@
+qm_import(Preprocess)
+
 set(STIMMT_PROJECT_DESCRIPTION "Script Task Integrated Manager for Musical Tools")
 set(STIMMT_PROJECT_COPYRIGHT "Copyright 2023 CrSjimo")
 set(STIMMT_GENERATED_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/../include)
@@ -6,14 +8,16 @@ set(STIMMT_GENERATED_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/../include)
 # CMake API
 # ----------------------------------
 function(stimmt_add_library _target)
-    set(options)
-    set(oneValueArgs PREFIX)
-    set(multiValueArgs)
+    set(options AUTOGEN NO_SYNC_INCLUDE NO_WIN_RC)
+    set(oneValueArgs SYNC_INCLUDE_PREFIX PREFIX)
+    set(multiValueArgs SYNC_INCLUDE_OPTIONS)
     cmake_parse_arguments(FUNC "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    set(CMAKE_AUTOUIC on)
-    set(CMAKE_AUTOMOC on)
-    set(CMAKE_AUTORCC on)
+    if(FUNC_AUTOGEN)
+        set(CMAKE_AUTOMOC ON)
+        set(CMAKE_AUTOUIC ON)
+        set(CMAKE_AUTORCC ON)
+    endif()
 
     if(STIMMT_BUILD_STATIC)
         set(_type STATIC)
@@ -24,7 +28,7 @@ function(stimmt_add_library _target)
     add_library(${_target} ${_type})
 
     if(WIN32 AND NOT STIMMT_BUILD_STATIC)
-        qtmediate_add_win_rc(${_target}
+        qm_add_win_rc(${_target}
             DESCRIPTION ${STIMMT_PROJECT_DESCRIPTION}
             COPYRIGHT ${STIMMT_PROJECT_COPYRIGHT}
         )
@@ -37,10 +41,10 @@ function(stimmt_add_library _target)
     endif()
 
     # Set global definitions
-    qtmediate_export_defines(${_target} ${_prefix_option})
+    qm_export_defines(${_target} ${_prefix_option})
 
     # Configure target
-    qtmediate_configure_target(${_target} ${FUNC_UNPARSED_ARGUMENTS})
+    qm_configure_target(${_target} ${FUNC_UNPARSED_ARGUMENTS})
 
     if(STIMMT_INSTALL)
         install(TARGETS ${_target}
@@ -60,10 +64,12 @@ function(stimmt_add_library _target)
     endif()
 
     # Generate a standard include directory in build directory
-    qtmediate_sync_include(. "${STIMMT_GENERATED_INCLUDE_DIR}/${_target}" ${_gen_include_options})
-    target_include_directories(${PROJECT_NAME} PUBLIC
-        "$<BUILD_INTERFACE:${STIMMT_GENERATED_INCLUDE_DIR}>"
-    )
+    if(NOT FUNC_NO_SYNC_INCLUDE)
+        qm_sync_include(. "${STIMMT_GENERATED_INCLUDE_DIR}/${_target}" ${_gen_include_options} ${FUNC_SYNC_INCLUDE_OPTIONS})
+        target_include_directories(${PROJECT_NAME} PUBLIC
+            "$<BUILD_INTERFACE:${STIMMT_GENERATED_INCLUDE_DIR}>"
+        )
+    endif()
 
     target_include_directories(${PROJECT_NAME} PRIVATE .)
 
@@ -108,7 +114,7 @@ if(STIMMT_BUILD_DOCUMENTATIONS)
 
     set(_doc_targets StimmtCore StimmtDevice StimmtFormat StimmtRemote StimmtSynthesis)
 
-    qtmediate_setup_doxygen(stimmt_RunDoxygen
+    qm_setup_doxygen(stimmt_RunDoxygen
         NAME "STIMMT"
         DESCRIPTION "Script Task Integrated Manager for Musical Tools"
         MDFILE ../README.md
