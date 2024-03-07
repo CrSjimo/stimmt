@@ -12,47 +12,56 @@ namespace stimmt::extension {
     static QString concatenateMessage(const QJSValue &values) {
         if (values.property("length").strictlyEquals(0))
             return "";
-        auto formatStr = values.property(0).toString();
-        int index = 1;
-        QRegExp rx(R"(%(\d*)(.?)(\d*)([dfioOs]))", Qt::CaseSensitive);
-        int pos = 0;
-        while ((pos = rx.indexIn(formatStr, pos)) != -1) {
-            if (index >= values.property("length").toInt())
-                break;
-            auto cap1 = rx.cap(1).toInt();
-            auto cap2 = rx.cap(2).isEmpty();
-            bool hasCap3;
-            auto cap3 = rx.cap(3).toInt(&hasCap3);
-            auto flag = rx.cap(4);
+        int index = 0;
+        QString formatStr = "";
+        if (values.property(0).isString()) {
+            formatStr = values.property(0).toString();
+            index = 1;
+            QRegExp rx(R"(%(\d*)(.?)(\d*)([dfioOs]))", Qt::CaseSensitive);
+            int pos = 0;
+            while ((pos = rx.indexIn(formatStr, pos)) != -1) {
+                if (index >= values.property("length").toInt())
+                    break;
+                auto cap1 = rx.cap(1).toInt();
+                auto cap2 = rx.cap(2).isEmpty();
+                bool hasCap3;
+                auto cap3 = rx.cap(3).toInt(&hasCap3);
+                auto flag = rx.cap(4);
 
-            int length = rx.matchedLength();
-            if (flag == "s" || flag == "o" || flag == "O") {
-                length = values.property(index).toString().length();
-                formatStr.replace(pos, rx.matchedLength(), values.property(index).toString());
-                index++;
-            } else if (flag == "d" || flag == "i") {
-                auto fillWidth = cap2 ? cap1 : cap3;
-                auto fillWithZero = !cap2;
-                QString s = QString("%1").arg(values.property(index).toInt(), fillWidth, 10,
-                                              fillWithZero ? QChar('0') : QChar(' '));
-                length = s.length();
-                formatStr.replace(pos, rx.matchedLength(), s);
-                index++;
-            } else if (flag == "f") {
-                auto fillWidth = cap1;
-                auto precision = cap3;
-                QString s =
-                        QString("%1").arg(values.property(index).toNumber(), fillWidth, 'f', hasCap3 ? precision : -1);
-                length = s.length();
-                formatStr.replace(pos, rx.matchedLength(), s);
-                index++;
+                int length = rx.matchedLength();
+                if (flag == "s" || flag == "o" || flag == "O") {
+                    length = values.property(index).toString().length();
+                    formatStr.replace(pos, rx.matchedLength(), values.property(index).toString());
+                    index++;
+                } else if (flag == "d" || flag == "i") {
+                    auto fillWidth = cap2 ? cap1 : cap3;
+                    auto fillWithZero = !cap2;
+                    QString s = QString("%1").arg(values.property(index).toInt(), fillWidth, 10,
+                                                  fillWithZero ? QChar('0') : QChar(' '));
+                    length = s.length();
+                    formatStr.replace(pos, rx.matchedLength(), s);
+                    index++;
+                } else if (flag == "f") {
+                    auto fillWidth = cap1;
+                    auto precision = cap3;
+                    QString s =
+                            QString("%1").arg(values.property(index).toNumber(), fillWidth, 'f', hasCap3 ? precision : -1);
+                    length = s.length();
+                    formatStr.replace(pos, rx.matchedLength(), s);
+                    index++;
+                }
+                pos += length;
             }
-            pos += length;
         }
+        QStringList otherStrings;
         for (; index < values.property("length").toInt(); index++) {
-            formatStr += (" " + values.property(index).toString());
+            auto value = values.property(index);
+            if (value.isError())
+                otherStrings += (value.toString() + "\n\t" +  value.property("stack").toString().split("\n").join("\n\t"));
+            else
+                otherStrings += (values.property(index).toString());
         }
-        return formatStr;
+        return formatStr + " " + otherStrings.join(' ');
     }
 
     void ConsolePrivate::install() {
