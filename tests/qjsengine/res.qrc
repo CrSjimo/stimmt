@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>test.js</file>
-    </qresource>
-</RCC>
