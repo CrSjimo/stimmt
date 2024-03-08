@@ -26,6 +26,11 @@ namespace stimmt {
 
     ModuleSystem::~ModuleSystem() = default;
 
+    QJSEngine *ModuleSystem::engine() const {
+        Q_D(const ModuleSystem);
+        return d->engine;
+    }
+
     QJSValue ModuleSystem::loadModule(const QString &moduleName) {
         Q_D(ModuleSystem);
         if (QDir(moduleName).isAbsolute() || moduleName.startsWith('.')) {
@@ -82,6 +87,11 @@ namespace stimmt {
             }
             return *it;
         }
+    }
+
+    bool ModuleSystem::registerModule(const QString &moduleName, QObject *object) {
+        Q_D(ModuleSystem);
+        return registerModule(moduleName, d->engine->newQObject(object));
     }
 
     bool ModuleSystem::registerModule(const QString &moduleName, const QJSValue &value) {

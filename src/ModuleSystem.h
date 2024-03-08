@@ -19,7 +19,10 @@ namespace stimmt {
         explicit ModuleSystem(QJSEngine *engine, QObject *parent = nullptr);
         ~ModuleSystem() override;
 
+        QJSEngine *engine() const;
+
         QJSValue loadModule(const QString &moduleName);
+        bool registerModule(const QString &moduleName, QObject *object);
         bool registerModule(const QString &moduleName, const QJSValue &value);
 
     protected:
