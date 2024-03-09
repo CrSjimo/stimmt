@@ -3,12 +3,27 @@
 
 #include <QJSEngine>
 
+#include <stimmt/ModuleSystem.h>
+
 namespace stimmt::modul {
     Storage::Storage(QObject *parent) : Storage(parent, *new StoragePrivate) {
-
     }
 
     Storage::~Storage() = default;
+
+    void Storage::registerModule(ModuleSystem *moduleSystem, Storage *localStorage, Storage *sessionStorage,
+                                 Storage *projectStorage, Storage *scopedStorage) {
+        auto moduleObj = moduleSystem->engine()->newObject();
+        if (localStorage)
+            moduleObj.property("localStorage") = moduleSystem->engine()->newQObject(localStorage);
+        if (sessionStorage)
+            moduleObj.property("sessionStorage") = moduleSystem->engine()->newQObject(sessionStorage);
+        if (projectStorage)
+            moduleObj.property("projectStorage") = moduleSystem->engine()->newQObject(projectStorage);
+        if (scopedStorage)
+            moduleObj.property("scopedStorage") = moduleSystem->engine()->newQObject(scopedStorage);
+        moduleSystem->registerModule("stimmt:storage", moduleObj);
+    }
 
     int Storage::length() const {
         Q_D(const Storage);

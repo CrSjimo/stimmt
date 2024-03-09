@@ -8,7 +8,7 @@
 namespace stimmt::extension {
 
     class TextEncoder : public QObject {
-    Q_OBJECT
+        Q_OBJECT
         Q_PROPERTY(QString encoding READ encoding)
     public:
         Q_INVOKABLE TextEncoder() = default;
@@ -27,7 +27,7 @@ namespace stimmt::extension {
     };
 
     class TextDecoder : public QObject {
-    Q_OBJECT
+        Q_OBJECT
         Q_PROPERTY(QString encoding READ encoding)
         Q_PROPERTY(bool fatal READ fatal)
         Q_PROPERTY(bool ignoreBOM READ ignoreBOM)
@@ -72,7 +72,6 @@ namespace stimmt::extension {
             if (!options.property("stream").toBool())
                 state.reset();
             return s;
-            return {};
         }
 
     private:

@@ -5,6 +5,8 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 
+#include <stimmt/ClosureHelper.h>
+
 namespace stimmt {
 
     QJSValue ModuleSystemPrivate::require(const QString &moduleName) {
@@ -15,8 +17,7 @@ namespace stimmt {
     ModuleSystem::ModuleSystem(QJSEngine *engine, QObject *parent) : ModuleSystem(parent, *new ModuleSystemPrivate) {
         Q_D(ModuleSystem);
         d->engine = engine;
-        auto dObj = engine->newQObject(d);
-        d->requireFunction = engine->evaluate("(t) => ((s) => t.require(s))").call({dObj});
+        d->requireFunction = ClosureHelper::makeClosure(engine, d).property("require");
         QQmlEngine::setObjectOwnership(d, QQmlEngine::CppOwnership);
     }
 

@@ -7,6 +7,10 @@
 
 #include <stimmt/stimmtGlobal.h>
 
+namespace stimmt {
+    class ModuleSystem;
+}
+
 namespace stimmt::modul {
 
     class StoragePrivate;
@@ -18,6 +22,8 @@ namespace stimmt::modul {
     public:
         explicit Storage(QObject *parent = nullptr);
         ~Storage() override;
+
+        static void registerModule(ModuleSystem *moduleSystem, Storage *localStorage, Storage *sessionStorage, Storage *projectStorage, Storage *scopedStorage);
 
         int length() const;
 

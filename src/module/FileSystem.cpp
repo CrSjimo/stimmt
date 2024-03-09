@@ -1,8 +1,10 @@
 #include "FileSystem.h"
 
+#include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QJSEngine>
+#include <QUrl>
 
 #include <stimmt/ModuleSystem.h>
 #include <stimmt/TypedArrayHelper.h>
@@ -15,8 +17,8 @@ namespace stimmt::modul {
 
     FileSystem::~FileSystem() = default;
 
-    void FileSystem::registerModule(ModuleSystem *moduleSystem) {
-        moduleSystem->registerModule("stimmt:filesystem", ClosureHelper::makeClosure(moduleSystem->engine(), new FileSystem));
+    void FileSystem::registerModule(ModuleSystem *moduleSystem, FileSystem *moduleObject) {
+        moduleSystem->registerModule("stimmt:filesystem", ClosureHelper::makeClosure(moduleSystem->engine(), moduleObject));
     }
 
     QStringList FileSystem::readDir(const QString &dir) const {
@@ -112,6 +114,10 @@ namespace stimmt::modul {
         if (!QDir().mkpath(dir)) {
             engine->throwError("Cannot mkpath: " + dir);
         }
+    }
+
+    void FileSystem::openFileOrUrl(const QString &path) const {
+        QDesktopServices::openUrl(QUrl::fromUserInput(path));
     }
 
 } // stimmt::modul

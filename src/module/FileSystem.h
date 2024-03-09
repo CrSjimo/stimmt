@@ -20,7 +20,7 @@ namespace stimmt::modul {
         explicit FileSystem(QObject *parent = nullptr);
         ~FileSystem() override;
 
-        static void registerModule(ModuleSystem *moduleSystem);
+        static void registerModule(ModuleSystem *moduleSystem, FileSystem *moduleObject);
 
     public slots:
         QStringList readDir(const QString &dir) const;
@@ -38,6 +38,8 @@ namespace stimmt::modul {
 
         void mkdir(const QString &dir) const;
         void mkpath(const QString &dir) const;
+
+        void openFileOrUrl(const QString &path) const;
     };
 
 } // stimmt::modul
