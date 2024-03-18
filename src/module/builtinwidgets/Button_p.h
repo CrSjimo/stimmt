@@ -66,7 +66,7 @@ namespace stimmt::widgets {
         }
     };
 
-    class STIMMT_EXPORT PushButton final : public AbstractButton {
+    class PushButton final : public AbstractButton {
         Q_OBJECT
         Q_PROPERTY(bool autoDefault READ autoDefault WRITE setAutoDefault)
         Q_PROPERTY(bool default READ isDefault WRITE setDefault)
@@ -85,7 +85,7 @@ namespace stimmt::widgets {
         }
     };
 
-    class STIMMT_EXPORT CheckBox final : public AbstractButton {
+    class CheckBox final : public AbstractButton {
         Q_OBJECT
         Q_PROPERTY(bool tristate READ isTristate WRITE setTristate)
         Q_PROPERTY(CheckState checkState READ checkState WRITE setCheckState)
@@ -110,6 +110,13 @@ namespace stimmt::widgets {
         inline QCheckBox *checkBox() const {
             return qobject_cast<QCheckBox *>(abstractButton());
         }
+    };
+
+    class RadioButton final : public AbstractButton {
+        Q_OBJECT
+    public:
+        Q_INVOKABLE RadioButton();
+        ~RadioButton() override;
     };
 
 } // stimmt::widgets

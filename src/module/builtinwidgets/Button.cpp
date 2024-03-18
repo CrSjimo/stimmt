@@ -131,15 +131,21 @@ namespace stimmt::widgets {
     }
 
     bool CheckBox::isTristate() const {
-        return false;
+        return checkBox()->isTristate();
     }
 
     void CheckBox::setCheckState(CheckBox::CheckState state) {
-
+        checkBox()->setCheckState(Qt::CheckState(state));
     }
 
     CheckBox::CheckState CheckBox::checkState() const {
-        return CheckBox::Checked;
+        return CheckState(checkBox()->checkState());
     }
+
+    RadioButton::RadioButton() : AbstractButton("RadioButton", new QRadioButton) {
+
+    }
+
+    RadioButton::~RadioButton() = default;
 
 } // stimmt::widgets

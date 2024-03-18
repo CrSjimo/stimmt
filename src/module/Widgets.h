@@ -18,7 +18,7 @@ namespace stimmt::modul {
         Q_OBJECT
         Q_DECLARE_PRIVATE(Widgets)
     public:
-        explicit Widgets(QObject *parent = nullptr);
+        explicit Widgets(QJSEngine *engine, QObject *parent = nullptr);
         ~Widgets() override;
 
         static void registerModule(ModuleSystem *moduleSystem, Widgets *moduleObject);
@@ -30,7 +30,7 @@ namespace stimmt::modul {
 
         template <typename T>
         void registerWidgetClass() {
-            addWidgetClassImpl(&T::staticMetaObject, T::staticMetaObject.className());
+            addWidgetClassImpl(&T::staticMetaObject, QString(T::staticMetaObject.className()).split("::").last());
         }
 
         void addExternalWidgetClass(const QJSValue &constructor, QString &name);

@@ -28,7 +28,10 @@ namespace stimmt {
         if (d->renderJSFunction.isUndefined()) {
             d->renderJSFunction = engine->evaluate(R"js((obj, attributes) => {
                 for (let key of Object.keys(attributes)) {
-                    obj[key] = attributes[key];
+                    if (key.startsWith("$"))
+                        obj[key.slice(1)].connect(attributes[key]);
+                    else
+                        obj[key] = attributes[key];
                 }
             })js");
         }

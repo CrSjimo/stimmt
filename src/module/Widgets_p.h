@@ -11,6 +11,7 @@ namespace stimmt::modul {
         Q_DECLARE_PUBLIC(Widgets)
     public:
         Widgets *q_ptr;
+        QJSEngine *engine;
         QMap<QString, QJSValue> moduleWidgetClasses;
         QMap<QString, QJSValue> renderableWidgetClasses;
 

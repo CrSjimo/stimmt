@@ -4,8 +4,13 @@
 #include <QDomDocument>
 #include <QJSEngine>
 
+#include <stimmt/ClosureHelper.h>
 #include <stimmt/ModuleSystem.h>
 #include <stimmt/WidgetWrapper.h>
+
+#include <stimmt/private/BoxLayout_p.h>
+#include <stimmt/private/Button_p.h>
+#include <stimmt/private/ComboBox_p.h>
 
 namespace stimmt::modul {
 
@@ -27,7 +32,7 @@ namespace stimmt::modul {
 
         if (node.isElement()) {
             auto elementJson = engine->newObject();
-            elementJson.setProperty("tag", node.toElement().tagName());
+            elementJson.setProperty("tagName", node.toElement().tagName());
 
             auto attributes = node.attributes();
             auto attributesJson = engine->newObject();
@@ -43,14 +48,21 @@ namespace stimmt::modul {
         }
     }
 
-    Widgets::Widgets(QObject *parent) : Widgets(parent, *new WidgetsPrivate) {
-
+    Widgets::Widgets(QJSEngine *engine, QObject *parent) : Widgets(parent, *new WidgetsPrivate) {
+        Q_D(Widgets);
+        d->engine = engine;
+        registerWidgetClass<widgets::VBoxLayout>();
+        registerWidgetClass<widgets::HBoxLayout>();
+        registerWidgetClass<widgets::PushButton>();
+        registerWidgetClass<widgets::CheckBox>();
+        registerWidgetClass<widgets::RadioButton>();
+        registerWidgetClass<widgets::ComboBox>();
     }
 
     Widgets::~Widgets() = default;
 
     void Widgets::registerModule(ModuleSystem *moduleSystem, Widgets *moduleObject) {
-        auto moduleObj = moduleSystem->engine()->newObject();
+        auto moduleObj = ClosureHelper::makeClosure(moduleSystem->engine(), moduleObject);
         for (const auto &widgetClassName : moduleObject->d_func()->moduleWidgetClasses.keys()) {
             moduleObj.setProperty(widgetClassName, moduleObject->d_func()->moduleWidgetClasses.value(widgetClassName));
         }
@@ -61,12 +73,13 @@ namespace stimmt::modul {
         Q_D(const Widgets);
         auto engine = qjsEngine(this);
         Q_ASSERT(engine);
-        auto tag = description.property("tag").toString();
+        auto tag = description.property("tagName").toString();
         auto obj = d->renderableWidgetClasses.value(tag);
         if (obj.isUndefined()) {
             engine->throwError(QJSValue::TypeError, QString("Invalid tag '%1'").arg(tag));
             return {};
         }
+        obj = obj.callAsConstructor();
         auto widgetWrapper = qobject_cast<WidgetWrapper *>(obj.toQObject());
         Q_ASSERT(widgetWrapper);
         widgetWrapper->render(obj, description.property("attributes"), description.property("children"), this);
@@ -92,17 +105,13 @@ namespace stimmt::modul {
 
     void Widgets::addWidgetClassImpl(const QMetaObject *metaObject, const QString &name) {
         Q_D(Widgets);
-        auto engine = qjsEngine(this);
-        Q_ASSERT(engine);
-        auto constructor = engine->newQMetaObject(metaObject);
+        auto constructor = d->engine->newQMetaObject(metaObject);
         d->renderableWidgetClasses.insert(name, constructor);
         d->moduleWidgetClasses.insert(name, constructor);
     }
 
     void Widgets::addExternalWidgetClass(const QJSValue &constructor, QString &name) {
         Q_D(Widgets);
-        auto engine = qjsEngine(this);
-        Q_ASSERT(engine);
         d->renderableWidgetClasses.insert(name, constructor);
     }
 } // stimmt

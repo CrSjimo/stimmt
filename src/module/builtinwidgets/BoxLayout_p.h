@@ -39,12 +39,9 @@ namespace stimmt::widgets {
 
     public slots:
         void addWidget(const QJSValue &jsWidget, int stretch = 0, int alignment = Qt::Alignment());
-        void addSpacing(int size);
         void addStretch(int stretch = 0);
-        void addStrut(int size);
 
         void insertWidget(int index, const QJSValue &jsWidget, int stretch = 0, int alignment = Qt::Alignment());
-        void insertSpacing(int index, int size);
         void insertStretch(int index, int stretch = 0);
 
     protected:
@@ -57,14 +54,14 @@ namespace stimmt::widgets {
         QJSValue m_childrenInsertFunction;
     };
 
-    class STIMMT_EXPORT HBoxLayout final : public BoxLayout {
+    class HBoxLayout final : public BoxLayout {
         Q_OBJECT
     public:
         Q_INVOKABLE HBoxLayout();
         ~HBoxLayout() override;
     };
 
-    class STIMMT_EXPORT VBoxLayout final : public BoxLayout {
+    class VBoxLayout final : public BoxLayout {
         Q_OBJECT
     public:
         Q_INVOKABLE VBoxLayout();
