@@ -11,6 +11,7 @@
 #include <stimmt/private/BoxLayout_p.h>
 #include <stimmt/private/Button_p.h>
 #include <stimmt/private/ComboBox_p.h>
+#include <stimmt/private/QuickWidget_p.h>
 
 namespace stimmt::modul {
 
@@ -57,6 +58,7 @@ namespace stimmt::modul {
         registerWidgetClass<widgets::CheckBox>();
         registerWidgetClass<widgets::RadioButton>();
         registerWidgetClass<widgets::ComboBox>();
+        registerWidgetClass<widgets::QuickWidget>();
     }
 
     Widgets::~Widgets() = default;

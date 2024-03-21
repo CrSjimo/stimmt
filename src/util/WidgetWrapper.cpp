@@ -7,7 +7,7 @@ namespace stimmt {
     WidgetWrapper::WidgetWrapper(const QString &tagName, QObject *wrappedObject, QObject *parent) : WidgetWrapper(parent, *new WidgetWrapperPrivate) {
         Q_D(WidgetWrapper);
         d->tagName = tagName;
-        d->wrappedObject = wrappedObject;
+        d->wrappedObject = getModified(wrappedObject);
     }
 
     WidgetWrapper::~WidgetWrapper() {
@@ -95,6 +95,10 @@ namespace stimmt {
             })js");
         }
         return d->findChildrenByTagNameJSFunction.call({children(), tagName});
+    }
+
+    QObject *WidgetWrapper::getModifiedImpl(QObject *originalObject) {
+        return originalObject; // TODO
     }
 
     WidgetWrapper::WidgetWrapper(QObject *parent, WidgetWrapperPrivate &d) : QObject(parent), d_ptr(&d) {

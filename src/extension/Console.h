@@ -32,6 +32,8 @@ namespace stimmt::extension {
         void printUncaughtError(const QJSValue &error);
         void print(Level level, const QString &message, const QString &fileTrace = {});
 
+        static Console *ofEngine(QJSEngine *engine);
+
     public slots:
         void assert(bool assertion, const QJSValue &args);
         void clear();

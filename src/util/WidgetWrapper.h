@@ -45,6 +45,11 @@ namespace stimmt {
             return nullptr;
         }
 
+        template<class T>
+        static T *getModified(T *originalObject) {
+            return qobject_cast<T *>(getModifiedImpl(originalObject));
+        }
+
     public slots:
         QJSValue findChildById(const QString &id);
         QJSValue findChildrenByTagName(const QString &tagName);
@@ -54,6 +59,8 @@ namespace stimmt {
 
     private:
         QScopedPointer<WidgetWrapperPrivate> d_ptr;
+
+        static QObject *getModifiedImpl(QObject *originalObject);
     };
 
 } // stimmt

@@ -90,8 +90,8 @@ stimmt_add_library(${PROJECT_NAME}
     SOURCES ${_src}
 #    LINKS QMCore
     # TODO links QtMediate
-    QT_LINKS Core Gui Widgets Qml Xml Svg
-    QT_INCLUDE_PRIVATE Core Gui Widgets Qml Xml Svg
+    QT_LINKS Core Gui Widgets Qml Xml Svg QuickWidgets
+    QT_INCLUDE_PRIVATE Core Gui Widgets Qml Xml Svg QuickWidgets
     SYNC_INCLUDE_OPTIONS FORCE
 )
 

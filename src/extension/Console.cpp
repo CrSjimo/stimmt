@@ -9,6 +9,8 @@
 
 namespace stimmt::extension {
 
+    static QHash<QJSEngine *, Console *> m_consoleDict;
+
     static QString concatenateMessage(const QJSValue &values) {
         if (values.property("length").strictlyEquals(0))
             return "";
@@ -114,13 +116,17 @@ namespace stimmt::extension {
             for (const auto &s : message.split("\n"))
                 qDebug().noquote().nospace() << prefix << s;
         });
+        m_consoleDict.insert(engine, this);
     }
 
     Console::Console(QObject *parent, ConsolePrivate &d) : QObject(parent), d_ptr(&d) {
         d.q_ptr = this;
     }
 
-    Console::~Console() = default;
+    Console::~Console() {
+        Q_D(Console);
+        m_consoleDict.remove(d->engine);
+    }
 
     void Console::printUncaughtError(const QJSValue &error) {
         QString message;
@@ -223,5 +229,9 @@ namespace stimmt::extension {
 
     void Console::warn(const QJSValue &args) {
         print(Warning, concatenateMessage(args));
+    }
+
+    Console *Console::ofEngine(QJSEngine *engine) {
+        return m_consoleDict.value(engine);
     }
 } // extension

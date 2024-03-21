@@ -62,7 +62,7 @@ namespace stimmt {
             };
             std::unique_ptr<ModuleSystemPrivate, decltype(guardFunc)> guard(d, guardFunc);
             d->currentDirectory = resolvingFileInfo.canonicalPath();
-            auto capsuledFunction = d->engine->evaluate(QString("(require, module, __filename, __dirname) => {%1}").arg(sourceCode), filePath);
+            auto capsuledFunction = d->engine->evaluate(QString("(require, module, __filename, __dirname) => {\n%1}").arg(sourceCode), filePath, 0);
             if (capsuledFunction.isError()) {
                 d->engine->globalObject().property("console").property("error").call({capsuledFunction});
                 d->engine->throwError(QString("Cannot load module '%1'").arg(filePath));

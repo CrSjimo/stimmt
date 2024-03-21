@@ -6,6 +6,10 @@
 #include <QDir>
 #include <QUrl>
 #include <QComboBox>
+#include <QQuickWidget>
+#include <QQmlApplicationEngine>
+#include <QTimer>
+#include <QPushButton>
 
 #include <stimmt/ModuleSystem.h>
 #include <stimmt/Console.h>
@@ -24,22 +28,14 @@ int main(int argc, char **argv) {
     ModuleSystem ms(&engine);
     modul::Widgets::registerModule(&ms, new modul::Widgets(&engine));
     auto renderXmlFunc = ms.loadModule("stimmt:widgets").property("renderXml");
-    auto layoutJSObj = renderXmlFunc.call({R"xml(
-        <VBoxLayout>
-            <PushButton>aaa</PushButton>
-            <CheckBox text="bbb"/>
-            <ComboBox id="test">
-                <ComboBox-Item>1</ComboBox-Item>
-                <ComboBox-Item>2</ComboBox-Item>
-            </ComboBox>
-        </VBoxLayout>)xml"});
-    auto widgetWrapper = qobject_cast<WidgetWrapper *>(layoutJSObj.toQObject());
-    auto comboBox = qobject_cast<QComboBox *>(WidgetWrapper::unwrapFromJSObject(widgetWrapper->findChildById("test")));
-    comboBox->addItem("newly added");
+    auto quickWidgetJSObj = renderXmlFunc.call({R"xml(<QuickWidget/>)xml"});
+    auto widgetWrapper = qobject_cast<WidgetWrapper *>(quickWidgetJSObj.toQObject());
+    qDebug() << widgetWrapper;
+    auto quickWidget = qobject_cast<QQuickWidget *>(widgetWrapper->wrappedObject());
     QMainWindow win;
-    auto mainWidget = new QWidget;
-    mainWidget->setLayout(qobject_cast<QLayout *>(WidgetWrapper::unwrapFromJSObject(layoutJSObj)));
-    win.setCentralWidget(mainWidget);
+    win.setCentralWidget(quickWidget);
+    engine.evaluate(R"js(w => w.load('C:/Qt/Examples/Qt-5.15.2/tutorials/alarms/main.qml'))js").call({quickWidgetJSObj});
+    engine.evaluate(R"js(w => w.messageReceived.connect((name, message) => console.log(name, message)))js").call({quickWidgetJSObj});
     win.show();
     return a.exec();
 }
