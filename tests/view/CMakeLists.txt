@@ -1,4 +1,4 @@
-project(tst_stimmt_QJSEngine)
+project(tst_stimmt_View)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

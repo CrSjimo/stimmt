@@ -1,1 +1,1 @@
-add_subdirectory(qjsengine)
+add_subdirectory(view)
