@@ -63,6 +63,7 @@ find_package(qmsetup REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(share)
+add_subdirectory(tool)
 
 if(STIMMT_BUILD_TESTS)
     add_subdirectory(tests)
