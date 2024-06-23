@@ -98,19 +98,19 @@ namespace stimmt::extension {
             QString prefix;
             switch (Level(level)) {
                 case Debug:
-                    prefix = QString("[js: debug][%1] ").arg(fileTrace);
+                    prefix = QString("[js:debug][%1] ").arg(fileTrace);
                     break;
                 case Info:
-                    prefix = QString("[js: info][%1] ").arg(fileTrace);
+                    prefix = QString("[js:info][%1] ").arg(fileTrace);
                     break;
                 case Log:
-                    prefix = QString("[js: log][%1] ").arg(fileTrace);
+                    prefix = QString("[js:log][%1] ").arg(fileTrace);
                     break;
                 case Warning:
-                    prefix = QString("[js: warning][%1] ").arg(fileTrace);
+                    prefix = QString("[js:warning][%1] ").arg(fileTrace);
                     break;
                 case Error:
-                    prefix = QString("[js: error][%1] ").arg(fileTrace);
+                    prefix = QString("[js:error][%1] ").arg(fileTrace);
                     break;
             }
             for (const auto &s : message.split("\n"))
