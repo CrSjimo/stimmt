@@ -31,6 +31,7 @@ namespace stimmt::modul {
         d->q_ptr = this;
         d->widget = new QWidget;
         auto mainLayout = new QVBoxLayout;
+        mainLayout->setContentsMargins(0, 0, 0, 0);
         d->formLayout = new QFormLayout;
         mainLayout->addLayout(d->formLayout);
         auto buttonLayout = new QHBoxLayout;

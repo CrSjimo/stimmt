@@ -11,7 +11,7 @@
 #include <stimmt/Timer.h>
 
 namespace stimmt::modul {
-    Quick::Quick() {
+    Quick::Quick() : d_ptr(new QuickPrivate) {
         Q_D(Quick);
         d->q_ptr = this;
         d->widget = new QQuickWidget(new QQmlApplicationEngine, nullptr);
