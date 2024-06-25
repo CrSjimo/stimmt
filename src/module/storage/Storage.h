@@ -18,14 +18,14 @@ namespace stimmt::modul {
     class STIMMT_EXPORT Storage : public QObject {
         Q_OBJECT
         Q_DECLARE_PRIVATE(Storage)
-        Q_PROPERTY(int length READ length)
+        Q_PROPERTY(int size READ size)
     public:
         explicit Storage(QObject *parent = nullptr);
         ~Storage() override;
 
         static void registerModule(ModuleSystem *moduleSystem, Storage *localStorage, Storage *sessionStorage, Storage *projectStorage, Storage *scopedStorage);
 
-        int length() const;
+        int size() const;
 
         void setData(const QVariantMap &data);
         QVariantMap data() const;

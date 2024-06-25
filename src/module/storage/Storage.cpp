@@ -25,7 +25,7 @@ namespace stimmt::modul {
         moduleSystem->registerModule("stimmt:storage", moduleObj);
     }
 
-    int Storage::length() const {
+    int Storage::size() const {
         Q_D(const Storage);
         QReadLocker locker(const_cast<QReadWriteLock *>(&d->lock));
         return d->data.size();
@@ -89,7 +89,9 @@ namespace stimmt::modul {
     QJSValue Storage::key(int index) const {
         Q_D(const Storage);
         QReadLocker locker(const_cast<QReadWriteLock *>(&d->lock));
-        return d->data.keys()[index];
+        if (const auto &key = d->data.keys()[index]; !key.isNull())
+            return key;
+        return {};
     }
 
     Storage::Storage(QObject *parent, StoragePrivate &d) : QObject(parent), d_ptr(&d) {
