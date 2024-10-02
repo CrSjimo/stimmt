@@ -7,6 +7,8 @@
 #include <QThread>
 #include <QSharedMemory>
 
+class QTimer;
+
 namespace stimmt {
 
     class WatchdogPrivate {

@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include <stimmt/StimmtGlobal.h>
+#include <stimmt/stimmtGlobal.h>
 
 class QJSEngine;
 

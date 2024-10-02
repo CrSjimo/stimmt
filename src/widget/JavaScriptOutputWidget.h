@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include <stimmt/StimmtGlobal.h>
+#include <stimmt/stimmtGlobal.h>
 
 class QTextBrowser;
 

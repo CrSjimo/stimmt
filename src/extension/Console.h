@@ -5,7 +5,7 @@
 #include <QJSValue>
 #include <QMap>
 
-#include <stimmt/StimmtGlobal.h>
+#include <stimmt/stimmtGlobal.h>
 
 #undef assert
 
