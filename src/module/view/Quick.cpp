@@ -80,7 +80,7 @@ namespace stimmt::modul {
             return d->moduleSystem->loadModule(moduleName);
         } else {
             auto engine = qmlEngine(this);
-            engine->throwError("Module is not available");
+            engine->throwError(QString("Module is not available"));
             return {};
         }
     }

@@ -4,6 +4,7 @@
 #include <stimmt/BasicForm.h>
 
 #include <QPointer>
+#include <QHash>
 
 class QFormLayout;
 

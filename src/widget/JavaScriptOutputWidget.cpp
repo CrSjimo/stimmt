@@ -21,6 +21,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QRegularExpression>
 
 #include <stimmt/Console.h>
 
@@ -217,21 +218,23 @@ namespace stimmt {
             cur.insertImage(img);
             cur = iconTable->cellAt(0, 1).firstCursorPosition();
         }
-        QRegExp rx(R"(file://[A-Za-z0-9\$\-_\.\+!\*'\(\)\/&\?=:%]*)");
+        static QRegularExpression rx(R"(file://[A-Za-z0-9\$\-_\.\+!\*'\(\)\/&\?=:%]*)");
         int pos = 0;
         int offsetPos = 0;
-        while ((pos = rx.indexIn(message, offsetPos)) != -1) {
+        QRegularExpressionMatch match;
+        while ((match = rx.match(message, offsetPos)).hasMatch()) {
             cur.insertText(message.mid(offsetPos, pos - offsetPos), fmt);
             fmt.setAnchor(true);
-            auto href = rx.cap();
-            href.replace(QRegExp("(:[0-9]+)+$"), "");
+            auto href = match.captured();
+            static QRegularExpression pattern("(:[0-9]+)+$");
+            href.replace(pattern, "");
             fmt.setAnchorHref(href);
             fmt.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-            cur.insertText(rx.cap(), fmt);
+            cur.insertText(match.captured(), fmt);
             fmt.setAnchor(false);
             fmt.setAnchorHref({});
             fmt.setUnderlineStyle(QTextCharFormat::NoUnderline);
-            offsetPos = pos + rx.matchedLength();
+            offsetPos = pos + match.capturedLength();
         }
         cur.insertText(message.mid(offsetPos), fmt);
         fmt.setForeground(QBrush(QColor{0x7f, 0x7f, 0x7f}));
@@ -245,7 +248,8 @@ namespace stimmt {
             if (fileUrl.isLocalFile()) {
                 fmt.setAnchor(true);
                 auto href = fileTrace;
-                href.replace(QRegExp("(:[0-9]+)+$"), "");
+                static QRegularExpression pattern("(:[0-9]+)+$");
+                href.replace(pattern, "");
                 fmt.setAnchorHref(href);
                 fmt.setUnderlineStyle(QTextCharFormat::SingleUnderline);
             }
@@ -365,7 +369,7 @@ namespace stimmt {
         bool ret;
         for (int i = 0; i < 2; i++) {
             if (m_findContext.isRegEx)
-                ret = m_textEdit->find(QRegExp(m_findContext.text), flags);
+                ret = m_textEdit->find(QRegularExpression(m_findContext.text), flags);
             else
                 ret = m_textEdit->find(m_findContext.text, flags);
             if (ret)

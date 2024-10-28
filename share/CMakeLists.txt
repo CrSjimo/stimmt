@@ -1,6 +1,6 @@
 if(STIMMT_BUILD_TRANSLATIONS)
     qm_import(Translate)
-    find_package(Qt5 COMPONENTS LinguistTools)
+    qm_find_qt(LinguistTools)
 
     qm_add_translation(${PROJECT_NAME}_translations
         LOCALES ${STIMMT_TRANSLATIONS}

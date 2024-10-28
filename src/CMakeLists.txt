@@ -86,12 +86,19 @@ set(CMAKE_AUTORCC on)
 
 file(GLOB_RECURSE _src *.h *.cpp *.qrc)
 
+qm_find_qt(Core)
+set(_qt_modules)
+if (QT_VERSION_MAJOR GREATER_EQUAL 6)
+    list(APPEND _qt_modules Core5Compat)
+endif()
+
+
 stimmt_add_library(${PROJECT_NAME}
     SOURCES ${_src}
 #    LINKS QMCore
     # TODO links QtMediate
-    QT_LINKS Core Gui Widgets Qml Xml Svg QuickWidgets
-    QT_INCLUDE_PRIVATE Core Gui Widgets Qml Xml Svg QuickWidgets
+    QT_LINKS Core Gui Widgets Qml Xml Svg QuickWidgets ${_qt_modules}
+    QT_INCLUDE_PRIVATE Core Gui Widgets Qml Xml Svg QuickWidgets ${_qt_modules}
     SYNC_INCLUDE_OPTIONS FORCE
 )
 

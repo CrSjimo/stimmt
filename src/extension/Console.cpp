@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QJSEngine>
+#include <QRegularExpression>
 
 #include <stimmt/TraceHelper.h>
 
@@ -19,21 +20,23 @@ namespace stimmt::extension {
         if (values.property(0).isString()) {
             formatStr = values.property(0).toString();
             index = 1;
-            QRegExp rx(R"(%(\d*)(.?)(\d*)([dfioOs]))", Qt::CaseSensitive);
+            static QRegularExpression rx(R"(%(\d*)(.?)(\d*)([dfioOs]))");
+            QRegularExpressionMatch match;
             int pos = 0;
-            while ((pos = rx.indexIn(formatStr, pos)) != -1) {
+            while (match = rx.match(formatStr, pos), match.hasMatch()) {
+                pos = match.capturedStart();
                 if (index >= values.property("length").toInt())
                     break;
-                auto cap1 = rx.cap(1).toInt();
-                auto cap2 = rx.cap(2).isEmpty();
+                auto cap1 = match.capturedView(1).toInt();
+                auto cap2 = match.capturedView(2).isEmpty();
                 bool hasCap3;
-                auto cap3 = rx.cap(3).toInt(&hasCap3);
-                auto flag = rx.cap(4);
+                auto cap3 = match.capturedView(3).toInt(&hasCap3);
+                auto flag = match.captured(4);
 
-                int length = rx.matchedLength();
+                auto length = match.capturedLength();
                 if (flag == "s" || flag == "o" || flag == "O") {
                     length = values.property(index).toString().length();
-                    formatStr.replace(pos, rx.matchedLength(), values.property(index).toString());
+                    formatStr.replace(pos, match.capturedLength(), values.property(index).toString());
                     index++;
                 } else if (flag == "d" || flag == "i") {
                     auto fillWidth = cap2 ? cap1 : cap3;
@@ -41,7 +44,7 @@ namespace stimmt::extension {
                     QString s = QString("%1").arg(values.property(index).toInt(), fillWidth, 10,
                                                   fillWithZero ? QChar('0') : QChar(' '));
                     length = s.length();
-                    formatStr.replace(pos, rx.matchedLength(), s);
+                    formatStr.replace(pos, match.capturedLength(), s);
                     index++;
                 } else if (flag == "f") {
                     auto fillWidth = cap1;
@@ -49,7 +52,7 @@ namespace stimmt::extension {
                     QString s =
                             QString("%1").arg(values.property(index).toNumber(), fillWidth, 'f', hasCap3 ? precision : -1);
                     length = s.length();
-                    formatStr.replace(pos, rx.matchedLength(), s);
+                    formatStr.replace(pos, match.capturedLength(), s);
                     index++;
                 }
                 pos += length;
